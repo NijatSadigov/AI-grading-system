@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: hedef-grading-api
+    runtime: go
+    region: frankfurt
+    plan: free
+    rootDir: backend
+    buildCommand: go build -o server ./cmd/server
+    startCommand: ./server

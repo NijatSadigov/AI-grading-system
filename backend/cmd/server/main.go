@@ -19,35 +19,42 @@ func main() {
 		log.Println("no .env file found, using OS env")
 	}
 
-	database.Connect()
 	config.Load()
+	database.Connect()
 
 	app := fiber.New(fiber.Config{
 		AppName: "School Grading API",
 	})
 
 	app.Use(logger.New())
+
+	// CORS — read allowed origins from env. Defaults to local dev.
+	// For Render set CORS_ORIGINS to your Vercel URL (e.g. https://hedef-grading.vercel.app)
+	// Multiple origins can be comma-separated.
+	corsOrigins := os.Getenv("CORS_ORIGINS")
+	if corsOrigins == "" {
+		corsOrigins = "http://localhost:5173"
+	}
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:5173", 
-		AllowCredentials: true,
+		AllowOrigins:     corsOrigins,
+		AllowCredentials: corsOrigins != "*",
 	}))
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "ok"})
 	})
 
-	// TODO: register routes here
-	// routes.Register(app)
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
 	handlers.Register(app)
+
 	for _, routes := range app.Stack() {
 		for _, route := range routes {
 			log.Printf("%-6s %s", route.Method, route.Path)
 		}
 	}
-	log.Fatal(app.Listen(":" + port))
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Fatal(app.Listen("0.0.0.0:" + port))
 }

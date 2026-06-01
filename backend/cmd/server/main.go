@@ -36,7 +36,7 @@ func main() {
 		corsOrigins = "http://localhost:5173"
 	}
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     corsOrigins,
+		AllowOrigins:     "https://ai-grading-system-umber.vercel.app",
 		AllowCredentials: corsOrigins != "*",
 	}))
 
